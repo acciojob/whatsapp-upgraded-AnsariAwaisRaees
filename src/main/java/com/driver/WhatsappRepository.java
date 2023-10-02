@@ -1,12 +1,14 @@
 package com.driver;
 
-import org.springframework.stereotype.Repository;
-
 import java.util.*;
+
+import org.springframework.stereotype.Repository;
 
 @Repository
 public class WhatsappRepository {
 
+    //Assume that each user belongs to at most one group
+    //You can use the below-mentioned hashmaps or delete these and create your own.
     private HashMap<Group, List<User>> groupUserMap;
     private HashMap<Group, List<Message>> groupMessageMap;
     private HashMap<Message, User> senderMap;
@@ -15,8 +17,10 @@ public class WhatsappRepository {
     private int customGroupCount;
     private int messageId;
 
+    //HashMap<String,User> userMap = new HashMap<>();
 
-    public WhatsappRepository() {
+
+    public WhatsappRepository(){
         this.groupMessageMap = new HashMap<Group, List<Message>>();
         this.groupUserMap = new HashMap<Group, List<User>>();
         this.senderMap = new HashMap<Message, User>();
@@ -27,16 +31,20 @@ public class WhatsappRepository {
     }
 
     public String saveUser(String name, String mobile) throws Exception {
-        if (userMobile.contains(mobile)) {
+
+        if(userMobile.contains(mobile)){
             throw new Exception("User already exists");
         }
-
         userMobile.add(mobile);
         User user = new User(name,mobile);
         return "SUCCESS";
+        // userMap.put(name,user);
     }
 
+
+
     public Group createGroup(List<User> users) {
+
         List<User> listOfUser = users;
         User admin = listOfUser.get(0);
         String groupName = "";
@@ -54,15 +62,21 @@ public class WhatsappRepository {
         adminMap.put(group,admin);// add admin to the adminMap
         groupUserMap.put(group,users);// add the list of group to the group-user-Map
         return  group;
+        //return "group added";
     }
 
     public int createMessage(String content) {
+        // The 'i^th' created message has message id 'i'.
+        // Return the message id.
         this.messageId += 1;
         Message message = new Message(messageId,content);
+        //messageMap.put(messageId,message);// add message to the message Map
         return messageId;
     }
 
-    public int sendMessage(Message message, User sender, Group group) throws Exception {
+
+    public int sendMessage(Message message, User sender, Group group) throws Exception{
+
         if(adminMap.containsKey(group)){
             List<User> users = groupUserMap.get(group);
             Boolean userFound = false;
@@ -94,9 +108,11 @@ public class WhatsappRepository {
             throw new Exception("You are not allowed to send message");
         }
         throw new Exception("Group does not exist");
+
     }
 
-    public String changeAdmin(User approve, User user, Group group) throws Exception {
+    public String changeAdmin(User approver, User user, Group group) throws Exception {
+
         if(groupUserMap.containsKey(group)){
             if(adminMap.containsKey(group)){
                 List<User> listOfUser = groupUserMap.get(group);
@@ -113,6 +129,14 @@ public class WhatsappRepository {
     }
 
     public int removeUser(User user) throws Exception {
+        //This is a bonus problem and does not contain any marks
+        //A user belongs to exactly one group
+        //If user is not found in any group, throw "User not found" exception
+        //If user is found in a group, and it is the admin, throw "Cannot remove admin" exception
+        //If user is not the admin, remove the user from the group, remove all its messages from all the databases, and update relevant attributes accordingly.
+        //If user is removed successfully, return (the updated number of users in the group + the updated number of messages in group + the updated number of overall messages)
+
+
         Boolean flag = false;
 
         List<Message> messageList = new ArrayList<>();
@@ -158,6 +182,10 @@ public class WhatsappRepository {
     }
 
     public String findMessage(Date start, Date end, int k) throws Exception {
+        //This is a bonus problem and does not contain any marks
+        // Find the Kth the latest message between start and end (excluding start and end)
+        // If the number of messages between given time is less than K, throw "K is greater than the number of messages" exception
+
         List<Message> messageList = new ArrayList<>();
 
         for (Message message : senderMap.keySet()){
@@ -183,7 +211,9 @@ public class WhatsappRepository {
         Date date = dateList.get(k-1);
         String ans = hm.get(date).getContent();
         return ans;
+
     }
+
 
     class sortCompare implements Comparator<Date>
     {
